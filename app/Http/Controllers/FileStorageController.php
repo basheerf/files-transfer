@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\FileStorage;
+use App\Models\User;
+use App\Notifications\FileNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Auth;
@@ -11,11 +13,13 @@ use Illuminate\Support\Str;
 
 class FileStorageController extends Controller
 {
+
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
+
     public function index()
     {
         $files=FileStorage::where('user_id',Auth::id())->paginate(5);
@@ -53,7 +57,8 @@ class FileStorageController extends Controller
 
         $input['user_id']=Auth::id();
         FileStorage::create($input);
-
+        $user=User::find(Auth::id());
+        $user->notify(new FileNotification($input['name']));
         return redirect()->route('upload.index');
 
     }
